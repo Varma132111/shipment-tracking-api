@@ -33,10 +33,10 @@ public class ShipmentEvent {
     @Column(name = "event_timestamp", nullable = false)
     private OffsetDateTime eventTimestamp;
 
-    @Column(name = "location", columnDefinition = "jsonb")
+    @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
-    @Column(name = "metadata", columnDefinition = "jsonb")
+    @Column(name = "metadata", columnDefinition = "TEXT")
     private String metadata;
 
     @Column(name = "created_at", nullable = false, updatable = false)

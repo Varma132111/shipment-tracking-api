@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS shipments (
     destination_address VARCHAR(255),
     carrier VARCHAR(100),
     current_status VARCHAR(32) NOT NULL DEFAULT 'PICKUP',
-    latest_location JSONB,
+    latest_location TEXT,
     eta TIMESTAMPTZ,
     condition VARCHAR(32),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS shipment_events (
     shipment_id VARCHAR(64) NOT NULL,
     event_type VARCHAR(32) NOT NULL,
     event_timestamp TIMESTAMPTZ NOT NULL,
-    location JSONB,
-    metadata JSONB,
+    location TEXT,
+    metadata TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id),
     CONSTRAINT uk_shipment_events_event_id UNIQUE (event_id)
@@ -67,9 +67,6 @@ CREATE INDEX IF NOT EXISTS idx_events_company_shipment_time
 
 CREATE INDEX IF NOT EXISTS idx_events_company_shipment_id
     ON shipment_events (company_id, shipment_id, id);
-
-CREATE INDEX IF NOT EXISTS idx_events_location_gin
-    ON shipment_events USING GIN (location);
 
 CREATE INDEX IF NOT EXISTS idx_webhooks_company_active
     ON webhooks (company_id, active);

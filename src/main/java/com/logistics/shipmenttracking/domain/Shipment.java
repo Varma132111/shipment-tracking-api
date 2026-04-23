@@ -30,7 +30,7 @@ public class Shipment {
     @Column(name = "current_status", nullable = false, length = 32)
     private ShipmentStatus currentStatus;
 
-    @Column(name = "latest_location", columnDefinition = "jsonb")
+    @Column(name = "latest_location", columnDefinition = "TEXT")
     private String latestLocation;
 
     @Column(name = "eta")

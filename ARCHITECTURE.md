@@ -31,7 +31,7 @@ Spring Boot app with a simple `controller -> service -> repository` flow.
 ## Scale Notes
 - Main event history index: `(company_id, shipment_id, event_timestamp DESC)`.
 - Rate-limit uniqueness: `(company_id, window_start)`.
-- Event location/metadata stored as JSONB.
+- Event location/metadata stored as TEXT (JSON string).
 
 ## Known Limits (v1)
 - Webhook dispatch is async but basic (no retry queue).

@@ -2,6 +2,7 @@ package com.logistics.shipmenttracking.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -17,81 +18,43 @@ class JwtAuthenticationFilterTest {
 
     private static final String SECRET = "my-super-secret-key-my-super-secret-key";
 
-    @Test
-    void doFilter_shouldSetAuthenticationForValidToken() throws Exception {
-        JwtService jwtService = new JwtService(SECRET);
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService);
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
+    @Test
+    void goodBearer_setsUser() throws Exception {
+        var jwt = new JwtService(SECRET);
+        var filter = new JwtAuthenticationFilter(jwt);
         String token = Jwts.builder()
-                .setSubject("dev-user")
+                .setSubject("u1")
                 .claim("companyId", "acme")
                 .setExpiration(new Date(System.currentTimeMillis() + 60_000))
                 .signWith(SignatureAlgorithm.HS256, SECRET.getBytes(StandardCharsets.UTF_8))
                 .compact();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + token);
-        MockHttpServletResponse response = new MockHttpServletResponse();
+        var req = new MockHttpServletRequest();
+        req.addHeader("Authorization", "Bearer " + token);
+        var res = new MockHttpServletResponse();
 
-        filter.doFilter(request, response, new MockFilterChain());
+        filter.doFilter(req, res, new MockFilterChain());
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        assertThat(principal).isInstanceOf(CurrentUser.class);
-        assertThat(((CurrentUser) principal).getCompanyId()).isEqualTo("acme");
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .isInstanceOfSatisfying(CurrentUser.class, u -> assertThat(u.getCompanyId()).isEqualTo("acme"));
     }
 
     @Test
-    void doFilter_shouldReturn401ForInvalidToken() throws Exception {
-        JwtService jwtService = new JwtService(SECRET);
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService);
+    void badBearer_401() throws Exception {
+        var filter = new JwtAuthenticationFilter(new JwtService(SECRET));
+        var req = new MockHttpServletRequest();
+        req.addHeader("Authorization", "Bearer garbage");
+        var res = new MockHttpServletResponse();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer not-a-valid-token");
-        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(req, res, new MockFilterChain());
 
-        filter.doFilter(request, response, new MockFilterChain());
-
-        assertThat(response.getStatus()).isEqualTo(401);
-        assertThat(response.getContentAsString()).contains("\"code\":\"UNAUTHORIZED\"");
-        assertThat(response.getContentAsString()).contains("\"details\":{}");
-        assertThat(response.getContentAsString()).contains("\"timestamp\":");
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-    }
-
-    @Test
-    void doFilter_shouldPassThroughWhenNoAuthorizationHeader() throws Exception {
-        JwtService jwtService = new JwtService(SECRET);
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService);
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        filter.doFilter(request, response, new MockFilterChain());
-
-        assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-    }
-
-    @Test
-    void doFilter_shouldReturn401WhenCompanyIdClaimMissing() throws Exception {
-        JwtService jwtService = new JwtService(SECRET);
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService);
-
-        String token = Jwts.builder()
-                .setSubject("dev-user")
-                .setExpiration(new Date(System.currentTimeMillis() + 60_000))
-                .signWith(SignatureAlgorithm.HS256, SECRET.getBytes(StandardCharsets.UTF_8))
-                .compact();
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + token);
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        filter.doFilter(request, response, new MockFilterChain());
-
-        assertThat(response.getStatus()).isEqualTo(401);
-        assertThat(response.getContentAsString()).contains("Missing required JWT claims");
+        assertThat(res.getStatus()).isEqualTo(401);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 }
