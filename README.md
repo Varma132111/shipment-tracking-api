@@ -76,6 +76,12 @@ curl http://localhost:8080/api/v1/shipments/SHP-123/status \
   -H "Authorization: Bearer <token>"
 ```
 
+Get paginated event history (all past events):
+```bash
+curl "http://localhost:8080/api/v1/shipments/SHP-123/events?page=0&size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
 Register webhook:
 ```bash
 curl -X POST http://localhost:8080/api/v1/webhooks \

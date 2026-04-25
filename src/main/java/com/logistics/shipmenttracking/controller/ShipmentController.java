@@ -35,9 +35,9 @@ public class ShipmentController {
     }
 
     @GetMapping("/{shipmentId}/events")
-    public Page<ShipmentEventResponse> getEvents(@PathVariable String shipmentId,
-                                                 @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                 @RequestParam(defaultValue = "50") @Min(1) @Max(200) int size) {
+    public Page<ShipmentEventResponse> getPastEvents(@PathVariable String shipmentId,
+                                                     @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                     @RequestParam(defaultValue = "50") @Min(1) @Max(200) int size) {
         Pageable pageable = PageRequest.of(page, size);
         return shipmentService.getEvents(SecurityUtils.companyId(), shipmentId, pageable);
     }

@@ -12,7 +12,7 @@ Quick API contract for Shipment Tracking API (v1).
 1. `POST /api/v1/shipments/{shipmentId}/events`
    - Add shipment event
 2. `GET /api/v1/shipments/{shipmentId}/events?page=0&size=50`
-   - Get shipment event history (paginated)
+   - Retrieves all past events for a shipment with pagination
 3. `GET /api/v1/shipments/{shipmentId}/status`
    - Get latest shipment status
 4. `POST /api/v1/webhooks`
@@ -113,6 +113,31 @@ Response `200`:
   "latestLocation": "{\"address\":\"New York, NY\"}",
   "eta": "2026-04-17T16:00:00Z",
   "condition": "GOOD"
+}
+```
+
+### GET /api/v1/shipments/SHP-12345/events?page=0&size=2
+Response `200`:
+```json
+{
+  "content": [
+    {
+      "eventId": "550e8400-e29b-41d4-a716-446655440000",
+      "shipmentId": "SHP-12345",
+      "eventType": "DELIVERED",
+      "timestamp": "2026-04-17T16:00:00Z"
+    },
+    {
+      "eventId": "d15fd131-f772-466f-9f5f-c17ac8a65b47",
+      "shipmentId": "SHP-12345",
+      "eventType": "IN_TRANSIT",
+      "timestamp": "2026-04-17T14:30:00Z"
+    }
+  ],
+  "number": 0,
+  "size": 2,
+  "totalElements": 5,
+  "totalPages": 3
 }
 ```
 

@@ -19,6 +19,6 @@ spring:
 
 app:
   jwt:
-    secret: ""
+    secret: "91PZilZbjm2K4BjmtI0iUmRcdnQup+wLgE48zeWwp+tXPwyt4dBM7GP9sMqTy8yy"
   rate-limit:
     requests-per-minute: 1000
